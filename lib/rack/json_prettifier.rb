@@ -16,6 +16,7 @@ module Rack
         response = [pretty_str]
         headers[CONTENT_LENGTH] = Rack::Utils.bytesize(pretty_str).to_s
       end
+    ensure
       [status, headers, response]
     end
   end

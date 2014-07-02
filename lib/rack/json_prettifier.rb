@@ -1,4 +1,6 @@
 require_relative 'json_prettifier/version'
+require 'json'
+
 module Rack
   class JsonPrettifier
     CONTENT_TYPE = 'Content-Type'.freeze
@@ -11,12 +13,14 @@ module Rack
     def call(env)
       status, headers, response = @app.call(env)
       if headers[CONTENT_TYPE] =~ /^application\/json/
-        obj = JSON.parse(response.body)
-        pretty_str = JSON.pretty_unparse(obj)
-        response = [pretty_str]
-        headers[CONTENT_LENGTH] = Rack::Utils.bytesize(pretty_str).to_s
+        begin
+          obj = JSON.parse(response.body)
+          pretty_str = JSON.pretty_unparse(obj)
+          response = [pretty_str]
+          headers[CONTENT_LENGTH] = Rack::Utils.bytesize(pretty_str).to_s
+        rescue JSON::ParserError
+        end
       end
-    ensure
       [status, headers, response]
     end
   end
